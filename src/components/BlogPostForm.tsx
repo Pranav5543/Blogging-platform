@@ -57,7 +57,7 @@ export default function BlogPostForm({ onSubmit, initialData, isSubmitting: pare
       }
       setSelectedFile(file);
       setImagePreview(URL.createObjectURL(file));
-      form.setValue('imageUrl', ''); // Clear existing URL if a new file is chosen. It will be set after upload.
+      form.setValue('imageUrl', ''); 
     }
   };
 
@@ -80,25 +80,41 @@ export default function BlogPostForm({ onSubmit, initialData, isSubmitting: pare
         const response = await fetch(`/api/upload?filename=${encodeURIComponent(selectedFile.name)}`, {
           method: 'POST',
           body: selectedFile,
-          // Content-Type is usually set automatically by the browser when body is a File object
         });
         
         if (!response.ok) {
           const errorResult = await response.json();
           // Prioritize the 'error' field from the server's JSON response for a more specific message
-          throw new Error(errorResult.error || errorResult.message || `Upload failed with status: ${response.status}`);
+          let errorMessage = errorResult.error || errorResult.message || `Upload failed with status: ${response.status}`;
+          let toastDuration = 5000;
+
+          if (errorMessage.includes("Vercel Blob token is missing")) {
+            errorMessage = "CRITICAL: Vercel Blob token is MISSING in the server environment. \n1. Create a '.env.local' file in your project root. \n2. Add BLOB_READ_WRITE_TOKEN='your_token_here'. \n3. IMPORTANT: RESTART your Next.js dev server (npm run dev). \n Check server terminal logs for more details.";
+            toastDuration = 15000; // Longer duration for critical messages
+          }
+          
+          throw new Error(errorMessage);
         }
         const blobResult = await response.json();
         finalImageUrl = blobResult.url;
       } catch (error) {
-        console.error("Image Upload Error:", error);
+        console.error("Image Upload Error (Caught in BlogPostForm):", error);
+        let toastDescription = 'Could not upload image. Please try again.';
+        let toastDuration = 5000;
+        if (error instanceof Error) {
+            toastDescription = error.message; // Use the message from the thrown error
+             if (error.message.includes("Vercel Blob token is missing")) {
+                toastDuration = 15000; 
+             }
+        }
         toast({ 
-            title: 'Image Upload Error', 
-            description: error instanceof Error ? error.message : 'Could not upload image. Please try again.', 
-            variant: 'destructive' 
+            title: 'Image Upload Failed', 
+            description: toastDescription, 
+            variant: 'destructive',
+            duration: toastDuration
         });
         setIsUploading(false);
-        return; // Stop form submission if upload fails
+        return; 
       }
       setIsUploading(false);
     }

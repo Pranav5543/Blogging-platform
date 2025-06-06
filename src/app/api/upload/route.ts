@@ -7,14 +7,27 @@ export async function POST(request: Request): Promise<NextResponse> {
   const { searchParams } = new URL(request.url);
   const filenameParam = searchParams.get('filename');
 
-  // Server-side log to check for the token
   const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
   console.log('/api/upload: Checking for BLOB_READ_WRITE_TOKEN. Found:', blobToken ? 'A token is present.' : 'Token is UNDEFINED or EMPTY.');
 
   if (!blobToken) {
-    console.error('/api/upload: CRITICAL ERROR - BLOB_READ_WRITE_TOKEN is not set in the server environment. Please ensure it is in your .env.local file and the Next.js development server has been RESTARTED.');
-    // Return a specific error if token is missing, so client knows it's a server config issue
-    return NextResponse.json({ message: 'Configuration error on server.', error: 'Vercel Blob token is missing in server environment.' }, { status: 500 });
+    console.error(`
+      --------------------------------------------------------------------------------------------
+      CRITICAL SERVER CONFIGURATION ERROR in /api/upload:
+      BLOB_READ_WRITE_TOKEN is UNDEFINED or EMPTY in the server's environment.
+
+      This means the Vercel Blob SDK cannot authenticate to upload files.
+
+      TO FIX THIS LOCALLY:
+      1. Ensure you have a file named '.env.local' in the ROOT of your project directory.
+      2. Add the following line to '.env.local':
+         BLOB_READ_WRITE_TOKEN="your_actual_token_from_vercel_blob_settings"
+         (Replace "your_actual_token_from_vercel_blob_settings" with the real token)
+      3. !!! IMPORTANT: You MUST RESTART your Next.js development server (npm run dev) !!!
+         Next.js only loads .env.local variables on startup.
+      --------------------------------------------------------------------------------------------
+    `);
+    return NextResponse.json({ message: 'Configuration error on server.', error: 'Vercel Blob token is missing in server environment. See server logs for detailed instructions.' }, { status: 500 });
   }
 
   if (!request.body) {
