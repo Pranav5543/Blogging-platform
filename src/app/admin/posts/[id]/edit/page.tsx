@@ -1,7 +1,9 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
 import BlogPostForm from '@/components/BlogPostForm';
 import { updateBlogPostAction } from '@/lib/actions';
 import { getPostById } from '@/lib/db'; // Fetching client-side, could be SSR with prop
@@ -9,6 +11,8 @@ import type { BlogPost, BlogPostFormData } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Spinner } from '@/components/Spinner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 export default function EditPostPage() {
   const router = useRouter();
@@ -76,6 +80,14 @@ export default function EditPostPage() {
 
   return (
     <div className="max-w-3xl mx-auto">
+      <div className="mb-6">
+        <Button variant="outline" asChild className="hover:bg-accent hover:text-accent-foreground">
+          <Link href="/admin/dashboard">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Dashboard
+          </Link>
+        </Button>
+      </div>
       <Card className="shadow-xl">
         <CardHeader>
           <CardTitle className="font-headline text-2xl">Edit Blog Post</CardTitle>
