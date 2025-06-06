@@ -48,7 +48,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar /> {/* Admin might have a different Navbar or a sub-nav */}
-      <main className="flex-grow container py-8">
+      <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
       </main>
     </div>
