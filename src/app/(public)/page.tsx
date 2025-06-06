@@ -41,7 +41,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                     alt={post.title}
                     layout="fill"
                     objectFit="cover"
-                    data-ai-hint="technology abstract"
+                    data-ai-hint="blog post" // More generic hint for homepage
                   />
                 </div>
               )}
