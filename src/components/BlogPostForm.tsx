@@ -11,8 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import type { BlogPost, BlogPostFormData } from "@/lib/types";
 import { summarizeContentAction } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
-import { Wand2, Loader2 as Loader, Upload, Image as ImageIcon, XCircle } from "lucide-react";
-import React, { useState } from "react";
+import { Wand2, Loader2 as Loader, XCircle } from "lucide-react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 
 const blogPostSchema = z.object({
@@ -23,7 +23,7 @@ const blogPostSchema = z.object({
 
 interface BlogPostFormProps {
   onSubmit: (data: BlogPostFormData) => Promise<void>;
-  initialData?: BlogPost;
+  initialData?: BlogPost | null;
   isSubmitting: boolean;
 }
 
@@ -43,6 +43,28 @@ export default function BlogPostForm({ onSubmit, initialData, isSubmitting: pare
     },
   });
 
+ useEffect(() => {
+    if (initialData) {
+      form.reset({
+        title: initialData.title || "",
+        content: initialData.content || "",
+        imageUrl: initialData.imageUrl || "",
+      });
+      setImagePreview(initialData.imageUrl || null);
+      setSelectedFile(null);
+      
+      const fileInput = document.getElementById('imageFile') as HTMLInputElement | null;
+      if (fileInput) {
+          fileInput.value = "";
+      }
+    } else {
+      form.reset({ title: "", content: "", imageUrl: "" });
+      setImagePreview(null);
+      setSelectedFile(null);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialData, form.reset]);
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
@@ -52,7 +74,7 @@ export default function BlogPostForm({ onSubmit, initialData, isSubmitting: pare
           description: "Please select an image smaller than 4MB.",
           variant: "destructive",
         });
-        event.target.value = ""; // Reset file input
+        event.target.value = ""; 
         return;
       }
       setSelectedFile(file);
@@ -64,17 +86,17 @@ export default function BlogPostForm({ onSubmit, initialData, isSubmitting: pare
   const removeImage = () => {
     setSelectedFile(null);
     setImagePreview(null);
-    form.setValue('imageUrl', '');
+    form.setValue('imageUrl', ''); 
     const fileInput = document.getElementById('imageFile') as HTMLInputElement | null;
     if (fileInput) {
-        fileInput.value = "";
+        fileInput.value = ""; 
     }
   };
 
   const handleFormSubmit = async (dataFromHook: BlogPostFormData) => {
-    let finalImageUrl = dataFromHook.imageUrl || initialData?.imageUrl || '';
+    let finalImageUrl = dataFromHook.imageUrl || ''; 
 
-    if (selectedFile) {
+    if (selectedFile) { 
       setIsUploading(true);
       try {
         const response = await fetch(`/api/upload?filename=${encodeURIComponent(selectedFile.name)}`, {
@@ -84,13 +106,15 @@ export default function BlogPostForm({ onSubmit, initialData, isSubmitting: pare
         
         if (!response.ok) {
           const errorResult = await response.json();
-          // Prioritize the 'error' field from the server's JSON response for a more specific message
           let errorMessage = errorResult.error || errorResult.message || `Upload failed with status: ${response.status}`;
           let toastDuration = 5000;
 
           if (errorMessage.includes("Vercel Blob token is missing")) {
             errorMessage = "CRITICAL: Vercel Blob token is MISSING in the server environment. \n1. Create a '.env.local' file in your project root. \n2. Add BLOB_READ_WRITE_TOKEN='your_token_here'. \n3. IMPORTANT: RESTART your Next.js dev server (npm run dev). \n Check server terminal logs for more details.";
-            toastDuration = 15000; // Longer duration for critical messages
+            toastDuration = 15000;
+          } else if (errorMessage.includes("BLOB_STORE_NOT_FOUND")) {
+             errorMessage = "Vercel Blob Store Not Found or Not Connected. Please ensure you have created a Blob store on Vercel and connected it to this project in the Vercel dashboard (Project -> Storage tab).";
+             toastDuration = 15000;
           }
           
           throw new Error(errorMessage);
@@ -102,8 +126,8 @@ export default function BlogPostForm({ onSubmit, initialData, isSubmitting: pare
         let toastDescription = 'Could not upload image. Please try again.';
         let toastDuration = 5000;
         if (error instanceof Error) {
-            toastDescription = error.message; // Use the message from the thrown error
-             if (error.message.includes("Vercel Blob token is missing")) {
+            toastDescription = error.message; 
+             if (error.message.includes("Vercel Blob token is missing") || error.message.includes("BLOB_STORE_NOT_FOUND")) {
                 toastDuration = 15000; 
              }
         }
@@ -226,6 +250,7 @@ export default function BlogPostForm({ onSubmit, initialData, isSubmitting: pare
             </FormControl>
             <FormDescription>
                 Upload an image for your blog post (PNG, JPG, GIF, WEBP, max 4MB).
+                 Current image URL (if any, from database): {form.watch('imageUrl') || 'None'}
             </FormDescription>
             {imagePreview && (
                 <div className="mt-4 relative w-full max-w-md p-2 border rounded-md shadow-sm bg-muted/50">
@@ -235,6 +260,7 @@ export default function BlogPostForm({ onSubmit, initialData, isSubmitting: pare
                         width={400} 
                         height={300} 
                         className="rounded-md object-contain max-h-64 w-auto"
+                        key={imagePreview} 
                     />
                     <Button 
                         type="button" 
@@ -254,7 +280,7 @@ export default function BlogPostForm({ onSubmit, initialData, isSubmitting: pare
                 name="imageUrl"
                 render={({ field }) => (
                     <FormItem className="sr-only">
-                        <FormLabel>Image URL (hidden, populated by upload)</FormLabel>
+                        <FormLabel>Image URL (hidden)</FormLabel>
                         <FormControl>
                             <Input {...field} type="hidden" readOnly />
                         </FormControl>
@@ -267,10 +293,9 @@ export default function BlogPostForm({ onSubmit, initialData, isSubmitting: pare
 
         <Button type="submit" disabled={currentIsSubmitting} className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground transition-transform duration-300 hover:scale-105">
           {(parentIsSubmitting || isUploading) && <Loader className="mr-2 h-4 w-4 animate-spin" />}
-          {isUploading ? "Uploading Image..." : (initialData ? "Update Post" : "Create Post")}
+          {isUploading ? "Uploading Image..." : (initialData?.id ? "Update Post" : "Create Post")}
         </Button>
       </form>
     </Form>
   );
 }
-

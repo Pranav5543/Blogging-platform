@@ -8,6 +8,8 @@ import { CalendarDays, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic'; // Ensure the page is always dynamically rendered
+
 interface BlogPostPageProps {
   params: { slug: string };
 }
@@ -74,4 +76,3 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     </article>
   );
 }
-
