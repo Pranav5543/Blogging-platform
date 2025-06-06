@@ -1,11 +1,12 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/components/AuthProvider';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: "Pranav's Digital Workbench",
-  description: 'A personal blog and digital workbench for Pranav.',
+  title: "Digital Workbench",
+  description: 'A personal blog and digital workbench.',
 };
 
 export default function RootLayout({

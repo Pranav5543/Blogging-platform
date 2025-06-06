@@ -1,3 +1,4 @@
+
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { getPostBySlug } from '@/lib/db';
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
     return { title: 'Post Not Found' };
   }
   return {
-    title: `${post.title} | Pranav's Digital Workbench`,
+    title: `${post.title} | Digital Workbench`,
     description: post.summary || post.content.substring(0, 160),
   };
 }
