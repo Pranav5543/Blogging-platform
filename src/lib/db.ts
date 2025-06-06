@@ -1,5 +1,7 @@
+
 import type { BlogPost, BlogPostFormData } from './types';
 import { slugify } from './utils';
+import { unstable_noStore as noStore } from 'next/cache';
 
 // In-memory store for blog posts
 let posts: BlogPost[] = [
@@ -28,8 +30,9 @@ let posts: BlogPost[] = [
 export const POSTS_PER_PAGE = 5;
 
 export async function getPosts({ page = 1, limit = POSTS_PER_PAGE }: { page?: number, limit?: number } = {}): Promise<{ posts: BlogPost[], totalPages: number }> {
+  noStore(); // Prevent caching of this function's output
   // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
+  await new Promise(resolve => setTimeout(resolve, 100)); // Reduced delay
   const sortedPosts = [...posts].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   const startIndex = (page - 1) * limit;
   const endIndex = page * limit;
@@ -39,30 +42,33 @@ export async function getPosts({ page = 1, limit = POSTS_PER_PAGE }: { page?: nu
 }
 
 export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
-  await new Promise(resolve => setTimeout(resolve, 300));
+  noStore(); // Prevent caching
+  await new Promise(resolve => setTimeout(resolve, 100)); // Reduced delay
   const post = posts.find(p => p.slug === slug);
   return post || null;
 }
 
 export async function getPostById(id: string): Promise<BlogPost | null> {
-  await new Promise(resolve => setTimeout(resolve, 300));
+  noStore(); // Prevent caching
+  await new Promise(resolve => setTimeout(resolve, 100)); // Reduced delay
   const post = posts.find(p => p.id === id);
   return post || null;
 }
 
 export async function createPost(data: BlogPostFormData): Promise<BlogPost> {
-  await new Promise(resolve => setTimeout(resolve, 500));
+  await new Promise(resolve => setTimeout(resolve, 100)); // Reduced delay
   const now = new Date().toISOString();
   const newPost: BlogPost = {
-    id: String(posts.length + 1),
-    slug: slugify(data.title), // Ensure slug is unique in a real app
+    id: String(Date.now()), // Use timestamp for more unique ID
+    slug: slugify(data.title),
     title: data.title,
     content: data.content,
+    summary: data.content.substring(0, 150) + (data.content.length > 150 ? "..." : ""), // Auto-generate summary
     imageUrl: data.imageUrl,
     createdAt: now,
     updatedAt: now,
   };
-  // Check for slug uniqueness and append a number if needed (simplified here)
+  
   let uniqueSlug = newPost.slug;
   let counter = 1;
   while (posts.some(p => p.slug === uniqueSlug)) {
@@ -71,35 +77,63 @@ export async function createPost(data: BlogPostFormData): Promise<BlogPost> {
   }
   newPost.slug = uniqueSlug;
   
-  posts.unshift(newPost); // Add to the beginning of the array
+  posts.unshift(newPost); 
+  console.log(`[db.ts] createPost: Post "${newPost.title}" created with id ${newPost.id}`);
   return newPost;
 }
 
 export async function updatePost(id: string, data: Partial<BlogPostFormData>): Promise<BlogPost | null> {
-  await new Promise(resolve => setTimeout(resolve, 500));
+  await new Promise(resolve => setTimeout(resolve, 100)); // Reduced delay
   const postIndex = posts.findIndex(p => p.id === id);
-  if (postIndex === -1) return null;
-
-  const updatedPost = { ...posts[postIndex], ...data, updatedAt: new Date().toISOString() };
-  if (data.title && data.title !== posts[postIndex].title) {
-    // Regenerate slug if title changed, ensure uniqueness
-    let newSlug = slugify(data.title);
-    let counter = 1;
-    // Check against other posts, not the current one being updated if its slug changes
-    while (posts.some(p => p.slug === newSlug && p.id !== id)) {
-        newSlug = `${slugify(data.title)}-${counter}`;
-        counter++;
-    }
-    updatedPost.slug = newSlug;
+  
+  if (postIndex === -1) {
+    console.error(`[db.ts] updatePost: Post with id ${id} not found.`);
+    return null;
   }
 
-  posts[postIndex] = updatedPost;
-  return updatedPost;
+  const currentPost = posts[postIndex];
+  console.log(`[db.ts] updatePost: Updating post ${id}. Current title: "${currentPost.title}". New data:`, data);
+
+  // Create the new post object by merging currentPost with the new data
+  // Ensure all fields of BlogPost are covered.
+  const updatedPostData: BlogPost = {
+    ...currentPost, // Start with all fields from the current post
+    title: data.title !== undefined ? data.title : currentPost.title,
+    content: data.content !== undefined ? data.content : currentPost.content,
+    imageUrl: data.imageUrl !== undefined ? data.imageUrl : currentPost.imageUrl, // This allows setting imageUrl to ''
+    updatedAt: new Date().toISOString(),
+    // summary will be re-evaluated if content changes, or kept if content doesn't change
+    summary: data.content !== undefined ? (data.content.substring(0, 150) + (data.content.length > 150 ? "..." : "")) : currentPost.summary,
+  };
+
+
+  if (data.title && data.title !== currentPost.title) {
+    let newSlug = slugify(data.title);
+    let counter = 1;
+    while (posts.some(p => p.slug === newSlug && p.id !== id)) { // Check slug against other posts
+      newSlug = `${slugify(data.title)}-${counter}`;
+      counter++;
+    }
+    updatedPostData.slug = newSlug;
+    console.log(`[db.ts] updatePost: Slug updated to "${updatedPostData.slug}" due to title change.`);
+  }
+
+  posts[postIndex] = updatedPostData;
+  console.log(`[db.ts] updatePost: Post ${id} updated successfully. New title: "${updatedPostData.title}"`);
+  return updatedPostData;
 }
 
 export async function deletePost(id: string): Promise<boolean> {
-  await new Promise(resolve => setTimeout(resolve, 500));
+  await new Promise(resolve => setTimeout(resolve, 100)); // Reduced delay
   const initialLength = posts.length;
   posts = posts.filter(p => p.id !== id);
-  return posts.length < initialLength;
+  const success = posts.length < initialLength;
+  if (success) {
+    console.log(`[db.ts] deletePost: Post ${id} deleted.`);
+  } else {
+    console.warn(`[db.ts] deletePost: Post ${id} not found or not deleted.`);
+  }
+  return success;
 }
+
+    
