@@ -8,7 +8,7 @@ import { auth, googleProvider } from '@/lib/firebase';
 import { useAuth } from '@/components/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChromeIcon, ShieldKeyhole } from 'lucide-react'; 
+import { ChromeIcon, Shield } from 'lucide-react'; 
 import { toast } from "@/hooks/use-toast";
 import { Spinner } from '@/components/Spinner';
 
@@ -43,19 +43,19 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background to-secondary/30 p-4">
-      <Card className="w-full max-w-md shadow-xl">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <ShieldKeyhole size={32} />
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/10 p-4">
+      <Card className="w-full max-w-md shadow-2xl rounded-xl border-2 border-primary/20 hover:border-primary/40 transition-all duration-300 ease-in-out transform hover:-translate-y-1">
+        <CardHeader className="text-center p-8">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-primary shadow-inner">
+            <Shield size={40} strokeWidth={1.5} />
           </div>
-          <CardTitle className="text-2xl font-headline">Admin Login</CardTitle>
-          <CardDescription>Sign in to manage your digital workbench.</CardDescription>
+          <CardTitle className="text-3xl font-headline text-primary">Admin Access</CardTitle>
+          <CardDescription className="text-muted-foreground pt-1">Securely sign in to manage your Digital Workbench.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-8 pt-0">
           <Button 
             onClick={handleGoogleSignIn} 
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 ease-in-out transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 ease-in-out transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-3 text-base"
             aria-label="Sign in with Google"
           >
             <ChromeIcon className="mr-2 h-5 w-5" />
