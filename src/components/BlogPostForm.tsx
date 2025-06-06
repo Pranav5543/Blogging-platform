@@ -80,20 +80,23 @@ export default function BlogPostForm({ onSubmit, initialData, isSubmitting: pare
         const response = await fetch(`/api/upload?filename=${encodeURIComponent(selectedFile.name)}`, {
           method: 'POST',
           body: selectedFile,
-          headers: {
-            'Content-Type': selectedFile.type, // Important for Vercel Blob
-          }
+          // Content-Type is usually set automatically by the browser when body is a File object
         });
         
         if (!response.ok) {
           const errorResult = await response.json();
-          throw new Error(errorResult.message || 'Upload failed');
+          // Prioritize the 'error' field from the server's JSON response for a more specific message
+          throw new Error(errorResult.error || errorResult.message || `Upload failed with status: ${response.status}`);
         }
         const blobResult = await response.json();
         finalImageUrl = blobResult.url;
       } catch (error) {
         console.error("Image Upload Error:", error);
-        toast({ title: 'Image Upload Error', description: error instanceof Error ? error.message : 'Could not upload image.', variant: 'destructive' });
+        toast({ 
+            title: 'Image Upload Error', 
+            description: error instanceof Error ? error.message : 'Could not upload image. Please try again.', 
+            variant: 'destructive' 
+        });
         setIsUploading(false);
         return; // Stop form submission if upload fails
       }
@@ -254,3 +257,4 @@ export default function BlogPostForm({ onSubmit, initialData, isSubmitting: pare
     </Form>
   );
 }
+
