@@ -31,7 +31,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   }
 
   return (
-    <article className="container py-8 md:py-12">
+    <article className="py-8 md:py-12">
       <div className="mx-auto max-w-3xl">
         <div className="mb-8">
           <Button variant="outline" asChild className="hover:bg-accent hover:text-accent-foreground">
@@ -74,3 +74,4 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     </article>
   );
 }
+
