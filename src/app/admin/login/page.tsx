@@ -29,7 +29,22 @@ export default function LoginPage() {
       router.push('/admin/dashboard');
     } catch (error) {
       console.error("Google Sign-In Error: ", error);
-      toast({ title: "Login Failed", description: "Could not sign in with Google. Please try again.", variant: "destructive" });
+      let errorMessage = "Could not sign in with Google. Please try again.";
+      // Check if it's a Firebase error by looking for a 'code' property,
+      // or just use the message if it's a generic error.
+      if (error && typeof error === 'object' && 'message' in error) {
+        errorMessage = (error as { message: string }).message;
+        if ('code' in error) {
+           // You can use (error as { code: string }).code for more specific handling if needed
+           console.error("Firebase Error Code:", (error as { code: string }).code);
+        }
+      }
+      
+      toast({ 
+        title: "Login Failed", 
+        description: errorMessage, 
+        variant: "destructive" 
+      });
     }
   };
 
