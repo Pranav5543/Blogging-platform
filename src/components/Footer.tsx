@@ -1,0 +1,10 @@
+export default function Footer() {
+  return (
+    <footer className="border-t py-8 text-center text-sm text-muted-foreground">
+      <div className="container">
+        <p>&copy; {new Date().getFullYear()} Pranav's Digital Workbench. All rights reserved.</p>
+        <p className="mt-1">Built with Next.js and Firebase.</p>
+      </div>
+    </footer>
+  );
+}
