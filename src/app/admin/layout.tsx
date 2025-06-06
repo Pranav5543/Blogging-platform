@@ -1,20 +1,23 @@
+
 "use client";
 
 import { useAuth } from '@/components/AuthProvider';
 import Navbar from '@/components/Navbar';
 import { Spinner } from '@/components/Spinner';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    if (!loading && !user) {
+    // If not loading, no user, and NOT on the login page, redirect to login
+    if (!loading && !user && pathname !== '/admin/login') {
       router.push('/admin/login');
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, pathname]);
 
   if (loading) {
     return (
@@ -27,9 +30,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
   
-  if (!user) {
-     // This case should ideally be handled by the useEffect redirect,
-     // but as a fallback, show spinner or a message before redirect kicks in.
+  // If there's no user AND we are NOT on the login page, show "Redirecting..."
+  // This prevents the login page itself from showing this message.
+  if (!user && pathname !== '/admin/login') {
     return (
       <div className="flex min-h-screen flex-col">
         <Navbar />
@@ -41,6 +44,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
+  // If user is authenticated OR if we are on the login page (even if !user), render children
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar /> {/* Admin might have a different Navbar or a sub-nav */}
