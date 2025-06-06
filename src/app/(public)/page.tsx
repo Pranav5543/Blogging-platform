@@ -18,7 +18,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const { posts, totalPages } = await getPosts({ page, limit: POSTS_PER_PAGE });
 
   return (
-    <div className="container py-8 md:py-12">
+    <>
       <header className="mb-12 text-center">
         <h1 className="font-headline text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
           Welcome to the Workbench
@@ -71,6 +71,6 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       )}
 
       <PaginationControls currentPage={page} totalPages={totalPages} />
-    </div>
+    </>
   );
 }
