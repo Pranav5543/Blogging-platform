@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -29,7 +30,7 @@ export default function Navbar() {
       <div className="container flex h-16 items-center justify-between">
         <Logo />
         <nav className="flex items-center gap-4">
-          <Link href="/" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+          <Link href="/" className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary">
             Blog
           </Link>
           {loading ? (

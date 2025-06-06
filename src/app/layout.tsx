@@ -5,8 +5,8 @@ import { AuthProvider } from '@/components/AuthProvider';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: "Digital Workbench",
-  description: 'A personal blog and digital workbench.',
+  title: "MindCanvas",
+  description: 'A personal blog and digital thoughtspace.',
 };
 
 export default function RootLayout({

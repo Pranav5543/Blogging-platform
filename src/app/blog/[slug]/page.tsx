@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
     return { title: 'Post Not Found' };
   }
   return {
-    title: `${post.title} | Digital Workbench`,
+    title: `${post.title} | MindCanvas`,
     description: post.summary || post.content.substring(0, 160),
   };
 }

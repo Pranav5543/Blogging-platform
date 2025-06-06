@@ -84,7 +84,7 @@ export default function LoginPage() {
             Admin Access
           </CardTitle>
           <CardDescription className="text-muted-foreground pt-1">
-            Securely sign in to manage your Digital Workbench.
+            Securely sign in to manage your MindCanvas.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-8 pt-0">

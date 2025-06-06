@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,7 +22,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     <>
       <header className="mb-12 text-center">
         <h1 className="font-headline text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
-          Welcome to the Workbench
+          Welcome to My Thoughtspace
         </h1>
         <p className="mt-4 text-lg text-muted-foreground md:text-xl">
           Thoughts, learnings, and digital creations.
@@ -41,7 +42,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                     alt={post.title}
                     layout="fill"
                     objectFit="cover"
-                    data-ai-hint="blog post" // More generic hint for homepage
+                    data-ai-hint="blog post"
                   />
                 </div>
               )}
