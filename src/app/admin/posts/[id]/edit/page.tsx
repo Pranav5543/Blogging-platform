@@ -6,13 +6,15 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import BlogPostForm from '@/components/BlogPostForm';
 import { updateBlogPostAction } from '@/lib/actions';
-import { getPostById } from '@/lib/db'; // Fetching client-side, could be SSR with prop
+import { getPostById } from '@/lib/db';
 import type { BlogPost, BlogPostFormData } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Spinner } from '@/components/Spinner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+
+export const dynamic = 'force-dynamic'; // Ensure the page is always dynamically rendered
 
 export default function EditPostPage() {
   const router = useRouter();
@@ -75,7 +77,8 @@ export default function EditPostPage() {
   }
 
   if (!post) {
-    return <div className="text-center text-muted-foreground">Post not found.</div>;
+    // This case should ideally be handled by the redirect in useEffect if post is not found
+    return <div className="text-center text-muted-foreground">Post not found or still loading...</div>;
   }
 
   return (
@@ -94,7 +97,13 @@ export default function EditPostPage() {
           <CardDescription>Update the details of your blog post.</CardDescription>
         </CardHeader>
         <CardContent>
-          <BlogPostForm onSubmit={handleSubmit} initialData={post} isSubmitting={isSubmitting} />
+          {/* Use post.updatedAt (or a combination like post.id + post.updatedAt) as key to force re-mount */}
+          <BlogPostForm 
+            key={post.updatedAt} 
+            onSubmit={handleSubmit} 
+            initialData={post} 
+            isSubmitting={isSubmitting} 
+          />
         </CardContent>
       </Card>
     </div>

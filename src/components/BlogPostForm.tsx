@@ -58,12 +58,13 @@ export default function BlogPostForm({ onSubmit, initialData, isSubmitting: pare
           fileInput.value = "";
       }
     } else {
+      // For new post, reset everything
       form.reset({ title: "", content: "", imageUrl: "" });
       setImagePreview(null);
       setSelectedFile(null);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialData, form.reset]);
+  }, [initialData]); // Dependency array simplified to just initialData
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -127,7 +128,7 @@ export default function BlogPostForm({ onSubmit, initialData, isSubmitting: pare
         let toastDuration = 5000;
         if (error instanceof Error) {
             toastDescription = error.message; 
-             if (error.message.includes("Vercel Blob token is missing") || error.message.includes("BLOB_STORE_NOT_FOUND")) {
+             if (error.message.includes("Vercel Blob token is missing") || error.message.includes("BLOB_STORE_NOT_FOUND") || toastDescription.includes("CRITICAL: Vercel Blob token is MISSING")) {
                 toastDuration = 15000; 
              }
         }
@@ -260,7 +261,7 @@ export default function BlogPostForm({ onSubmit, initialData, isSubmitting: pare
                         width={400} 
                         height={300} 
                         className="rounded-md object-contain max-h-64 w-auto"
-                        key={imagePreview} 
+                        key={imagePreview} // Using imagePreview as key helps if the src string itself changes
                     />
                     <Button 
                         type="button" 
@@ -279,7 +280,7 @@ export default function BlogPostForm({ onSubmit, initialData, isSubmitting: pare
                 control={form.control}
                 name="imageUrl"
                 render={({ field }) => (
-                    <FormItem className="sr-only">
+                    <FormItem className="sr-only"> {/* Keep this hidden as it's for form submission state */}
                         <FormLabel>Image URL (hidden)</FormLabel>
                         <FormControl>
                             <Input {...field} type="hidden" readOnly />
