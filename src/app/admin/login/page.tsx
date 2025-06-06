@@ -24,18 +24,21 @@ export default function LoginPage() {
 
   const handleGoogleSignIn = async () => {
     try {
+      // Diagnostic log
+      console.log("Attempting Google Sign-In. SDK is using authDomain:", auth.app.options.authDomain);
+      
       await signInWithPopup(auth, googleProvider);
       toast({ title: "Login Successful", description: "Redirecting to dashboard..." });
       router.push('/admin/dashboard');
     } catch (error) {
       console.error("Google Sign-In Error: ", error);
       let errorMessage = "Could not sign in with Google. Please try again.";
-      // Check if it's a Firebase error by looking for a 'code' property,
-      // or just use the message if it's a generic error.
-      if (error && typeof error === 'object' && 'message' in error) {
-        errorMessage = (error as { message: string }).message;
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'object' && error !== null && 'message' in error) {
+        errorMessage = String((error as { message: string }).message);
         if ('code' in error) {
-           // You can use (error as { code: string }).code for more specific handling if needed
            console.error("Firebase Error Code:", (error as { code: string }).code);
         }
       }
@@ -81,3 +84,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
