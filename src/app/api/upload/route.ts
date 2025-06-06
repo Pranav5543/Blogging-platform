@@ -7,6 +7,16 @@ export async function POST(request: Request): Promise<NextResponse> {
   const { searchParams } = new URL(request.url);
   const filenameParam = searchParams.get('filename');
 
+  // Server-side log to check for the token
+  const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+  console.log('/api/upload: Checking for BLOB_READ_WRITE_TOKEN. Found:', blobToken ? 'A token is present.' : 'Token is UNDEFINED or EMPTY.');
+
+  if (!blobToken) {
+    console.error('/api/upload: CRITICAL ERROR - BLOB_READ_WRITE_TOKEN is not set in the server environment. Please ensure it is in your .env.local file and the Next.js development server has been RESTARTED.');
+    // Return a specific error if token is missing, so client knows it's a server config issue
+    return NextResponse.json({ message: 'Configuration error on server.', error: 'Vercel Blob token is missing in server environment.' }, { status: 500 });
+  }
+
   if (!request.body) {
     return NextResponse.json({ message: 'No file body.' }, { status: 400 });
   }
@@ -29,13 +39,3 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ message: 'Error uploading file.', error: errorMessage }, { status: 500 });
   }
 }
-
-// Optional: Runtime configuration for Vercel
-// export const runtime = 'edge'; // Vercel Blob works well with edge runtime
-
-// To ensure the body is streamed, you might need to configure Next.js if not using Edge.
-// For Node.js runtime, ensure body parsing is not prematurely consumed.
-// However, for simple file uploads with `fetch` and `FormData`, this usually works.
-// If running into issues with body streaming on Node.js runtime on Vercel,
-// you might need to use a library like `formidable` or adjust API route body parser config.
-// For Vercel deployment, using the Edge runtime is often recommended for Blob operations.
